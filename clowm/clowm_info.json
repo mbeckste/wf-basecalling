@@ -1,0 +1,11 @@
+{
+  "inputParameters": ["input", "ref"],
+  "outputParameters": ["out_dir"],
+  "exampleParameters": {
+    "input": "s3://workflow-exampledata/epi2me-ont-basecalling/example1/input",
+    "ref": "s3://workflow-exampledata/epi2me-ont-basecalling/example1/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta",
+    "sample_name": "SAMPLE",
+    "basecaller_cfg": "dna_r10.4.1_e8.2_400bps_hac@v4.1.0",
+    "remora_cfg": "dna_r10.4.1_e8.2_400bps_hac@v4.1.0_5mCG_5hmCG@v2"
+  }
+}
