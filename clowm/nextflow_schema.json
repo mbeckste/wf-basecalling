@@ -41,14 +41,13 @@
         "out_dir": {
           "title": "Output directory",
           "type": "string",
-          "default": "output",
           "format": "directory-path",
           "description": "Directory for output of all files.",
           "help_text": "S3 url to output bucket."
         },
         "sample_name": {
           "type": "string",
-          "default": "SAMPLE",
+          "default": "MY-SAMPLE-NAME_",
           "description": "Sample name to prefix file names of workflow outputs."
         },
         "fastq_only": {
