@@ -1,4 +1,4 @@
-# Basecalling workflow for Oxford Nanopore reads
+# GPU supporting basecalling workflow for Oxford Nanopore reads 
 
 This is a CloWM compatible version of the Helper workflow for signal processing and primary data analysis of Oxford Nanopore Technologies' reads developed by EPI2ME labs.
 
