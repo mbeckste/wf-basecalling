@@ -18,10 +18,32 @@ and aligning it with `minimap2` to produce a sorted, indexed CRAM.
 
 
 
+## Pipeline overview
+
+### 1. Prerequisites
+
+The workflow uses [Dorado](https://github.com/nanoporetech/dorado) for basecalling which includes the use of [Remora](https://github.com/nanoporetech/remora) for modified basecalling.
+Basecalling with `Dorado` requires an NVIDIA GPU with [Pascal architecture or newer](https://www.nvidia.com/en-gb/technologies/) and at least 8 GB of vRAM. These requirements are fullfilled on the CloWM plattform which is powered by de.NBI cloud resources.
+
+
+### 2. Choosing a model
+
+To select the relevant model see the `dorado` repository for a [table of available models](https://github.com/nanoporetech/dorado#available-basecalling-models) to select for `--basecaller_cfg` and `--remora_cfg`.
+
+### 3. Aligning to a reference
+
+The workflow can optionally perform the alignment of the basecalled data using [minimap2](https://github.com/lh3/minimap2) to a reference of choice, provided with the `--ref` option.
+
+### 4. Duplex calling
+
+wf-basecalling supports [duplex calling](https://github.com/nanoporetech/dorado#duplex), which is enabled with the `--duplex` option. If you used a chemistry and flowcell combination that supported duplex reads, you should switch this option on. The resulting BAM/CRAM will quality filtered and then automatically split in separate BAM/CRAM files for the simplex and duplex reads.
+Since `dorado duplex` requires the inputs to be in `pod5` format, the workflow will perform the conversion automatically using [pod5 convert fast5](https://github.com/nanoporetech/pod5-file-format/blob/master/python/pod5/README.md#pod5-convert-fast5). These files are normally deleted upon completion of the analysis, but can optionally be saved by the user by providing the `--output_pod5` option.
+
+
 
 ## Compute requirements
 
-Recommended requirements:
+Recommended requirements (these are automatically fullfilled on the CloWM plattform):
 
 + CPUs = 64
 + Memory = 256GB
@@ -36,7 +58,7 @@ Approximate run time: Variable depending on coverage, genome size, model of choi
 
 ## Run the workflow
 
-A demo dataset is provided for testing of the workflow. It can be directly used together with preset default parameters by pressing the Try it out button in the workflow parameter form. 
+A demo dataset is provided for testing of the workflow. It can be directly used together with preset default parameters by pressing the `Try it out` button in the workflow parameter form. 
 
 
 
@@ -117,58 +139,6 @@ The folder may contain other folders of FAST5 or POD5 files and all files will b
 | stats_threads | integer | Set max number of threads to use for getting stats from output files. (limited by config executor cpus) |  | 4 |
 
 
-### Real Time Analysis Options
-
-| Nextflow parameter name  | Type | Description | Help | Default |
-|--------------------------|------|-------------|------|---------|
-| watch_path | boolean | Enable to continuously watch the input directory for new input files. Reads will be analysed as they appear. | This option enables the use of Nextflow's directory watching feature to constantly monitor input directories for new files. As soon as files are written by an external process Nextflow will begin analysing these files. The workflow will accumulate data over time to produce an updating report. Real time analysis of duplex data may lead to lower duplex rates than what would have been obtained by running basecalling after sequencing. | False |
-| read_limit | integer | Stop processing data when a particular number of reads have been analysed. | By default the workflow will run indefinitely when using the real time watch path option. This will set the upper bound on the number of reads that will be analysed before the workflow is automatically stopped and no more data is analysed. |  |
-
-
-
-
-
-
-## Outputs
-
-Output files may be aggregated including information for all samples or provided per sample. Per-sample files will be prefixed with respective aliases and represented below as {{ alias }}.
-
-| Title | File path | Description | Per sample or aggregated |
-|-------|-----------|-------------|--------------------------|
-| workflow report | wf-basecalling-report.html | Report summarising the work done by the basecalling workflow | per-sample |
-| Simplex alignment file of passed reads | {{ alias }}.pass.simplex.{{ format }} | BAM or CRAM file of simplex reads for the sample that pass QC filtering. | per-sample |
-| Duplex alignment file of passed reads | {{ alias }}.pass.duplex.{{ format }} | BAM or CRAM file of duplex reads for the sample that pass QC filtering. Created if duplex basecalling is requested. | per-sample |
-| Simplex alignment file index of passed reads | {{ alias }}.pass.simplex.{{ format }}.{{ index_format }} | The index of the resulting BAM or CRAM file with the simplex reads that pass QC filtering. | per-sample |
-| Duplex alignment file index of passed reads | {{ alias }}.pass.duplex.{{ format }}.{{ index_format }} | The index of the resulting BAM or CRAM file with the duplex reads that pass QC filtering. Created if duplex basecalling is requested. | per-sample |
-| Simplex alignment file of failed reads | {{ alias }}.fail.simplex.{{ format }} | BAM or CRAM file of simplex reads for the sample that fail QC filtering. | per-sample |
-| Duplex alignment file of failed reads | {{ alias }}.fail.duplex.{{ format }} | BAM or CRAM file of duplex reads for the sample that fail QC filtering. Created if duplex basecalling is requested. | per-sample |
-| Simplex alignment file index of failed reads | {{ alias }}.fail.simplex.{{ format }}.{{ index_format }} | The index of the resulting BAM or CRAM file with the simplex reads that fail QC filtering. | per-sample |
-| Duplex alignment file index of failed reads | {{ alias }}.fail.duplex.{{ format }}.{{ index_format }} | The index of the resulting BAM or CRAM file with the duplex reads that fail QC filtering. Created if duplex basecalling is requested. | per-sample |
-
-
-
-
-## Pipeline overview
-
-### 1. Prerequisites
-
-The workflow uses [Dorado](https://github.com/nanoporetech/dorado) for basecalling which includes the use of [Remora](https://github.com/nanoporetech/remora) for modified basecalling.
-Basecalling with `Dorado` requires an NVIDIA GPU with [Pascal architecture or newer](https://www.nvidia.com/en-gb/technologies/) and at least 8 GB of vRAM. These requirements are fullfilled on the CloWM plattform which is powered by de.NBI cloud resources.
-
-
-### 2. Choosing a model
-
-To select the relevant model see the `dorado` repository for a [table of available models](https://github.com/nanoporetech/dorado#available-basecalling-models) to select for `--basecaller_cfg` and `--remora_cfg`.
-
-### 3. Aligning to a reference
-
-The workflow can optionally perform the alignment of the basecalled data using [minimap2](https://github.com/lh3/minimap2) to a reference of choice, provided with the `--ref` option.
-
-### 4. Duplex calling
-
-wf-basecalling supports [duplex calling](https://github.com/nanoporetech/dorado#duplex), which is enabled with the `--duplex` option. If you used a chemistry and flowcell combination that supported duplex reads, you should switch this option on. The resulting BAM/CRAM will quality filtered and then automatically split in separate BAM/CRAM files for the simplex and duplex reads.
-Since `dorado duplex` requires the inputs to be in `pod5` format, the workflow will perform the conversion automatically using [pod5 convert fast5](https://github.com/nanoporetech/pod5-file-format/blob/master/python/pod5/README.md#pod5-convert-fast5). These files are normally deleted upon completion of the analysis, but can optionally be saved by the user by providing the `--output_pod5` option.
-
 
 
 
@@ -181,7 +151,7 @@ Since `dorado duplex` requires the inputs to be in `pod5` format, the workflow w
 
 ## FAQ's
 
-If your question is not answered here, please report any issues or suggestions on the [github issues](https://github.com/epi2me-labs/wf-basecalling/issues) page or start a discussion on the [community](https://community.nanoporetech.com/).
+If your question is not answered here, please contact the workflow maintainer or report any issues or suggestions on the [github issues](https://github.com/epi2me-labs/wf-basecalling/issues) page or start a discussion on the [community](https://community.nanoporetech.com/).
 
 
 
@@ -190,6 +160,7 @@ If your question is not answered here, please report any issues or suggestions o
 + [Importing third-party workflows into EPI2ME Labs](https://labs.epi2me.io/nexflow-for-epi2melabs/)
 
 See the [EPI2ME website](https://labs.epi2me.io/) for lots of other resources and blog posts.
+
 
 
 
